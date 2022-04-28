@@ -63,9 +63,6 @@ int main()
 
     EN = 0;
 
-    DIR1 = 1;
-    DIR2 = 0;
-
     frequence = (200 * 16) * (360 / 360);
     tmps = (1/frequence)/2;
     t.attach(&flip1, tmps);
@@ -78,31 +75,36 @@ int main()
         if (process_variable >= 90)
             process_variable = process_variable - 256;
 
-        if (process_variable > 20)
+        float erreur = 0 - process_variable;
+        printf("Erreur: %d \r\n", erreur);
+
+        float commande = 22 * erreur;
+
+        if (commande < 0)
         {
             DIR1 = 0;
             DIR2 = 1;
-            frequence = (200 * 16) * (360 / 360);
-            tmps = (1/frequence)/2;
-            t.attach(&flip1, tmps);
+            EN = 0;
+            frequence = (200 * 16) * (commande / 360) * -1;
+            //tmps = (1/frequence)/2;
+            //t.attach(&flip1, tmps);
         }
 
-        else if (process_variable < -20)
+        if (commande > 0)
         {
             DIR1 = 1;
             DIR2 = 0;
-            frequence = (200 * 16) * (360 / 360);
-            tmps = (1/frequence)/2;
-            t.attach(&flip1, tmps);
+            EN = 0;
+            frequence = (200 * 16) * (commande / 360);
+            //tmps = (1/frequence)/2;
+            //t.attach(&flip1, tmps);
         }
-        else 
-        {
-            frequence = (200 * 16) * (0 / 360);
-            tmps = (1/frequence)/2;
-            t.attach(&flip1, tmps);
-        }
+        
+        if (commande == 0)
+            EN = 1;
 
-        printf("%d \r\n", process_variable);
+        //if (erreur ) 
+
         wait_us(100000);
     }
 }
