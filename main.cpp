@@ -21,9 +21,8 @@ I2C cmps12(p9, p10);        // sda, scl
 
 int process_variable;
 
-char data[31];
+char data[31]; 
 // main() runs in its own thread in the OS
-
 
 //Pin du moteur 
     // Pin controle avant/arriere
@@ -76,12 +75,12 @@ int main()
         if (process_variable >= 90)
             process_variable = process_variable - 256;
 
-        float erreur = 0 - process_variable;
+        int erreur = 0 - process_variable;
         printf("Erreur: %d \r\n", erreur);
-
+     
         float commande = 22 * erreur;
 
-        if (commande < 0)
+        if (commande < -1)
         {
             DIR1 = 0;
             DIR2 = 1;
@@ -91,7 +90,7 @@ int main()
             //t.attach(&flip1, tmps);
         }
 
-        if (commande > 0)
+        if (commande > 1)
         {
             DIR1 = 1;
             DIR2 = 0;
@@ -101,10 +100,17 @@ int main()
             //t.attach(&flip1, tmps);
         }
         
-        if (commande == 0)
+        if (commande > -5 && commande < 5 )
+        {
+            EN = 0;
+            DIR1 = 1;
+            DIR2 = 1;
+            frequence = (200 * 16) * (280.0/ 360);
+        }
+        if (process_variable > 70 || process_variable < -70) //Arret en chute
+        {
             EN = 1;
-
-        //if (erreur ) 
+        }
 
         wait_us(100000);
     }
