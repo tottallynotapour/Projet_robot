@@ -43,8 +43,17 @@ DigitalOut STEP2(p23);
 
 // Variables
 Timeout t;
+Timer compteur;
 
-float tmps, frequence;
+float temps, temps2, dtemps;
+float commande;
+float P, I, PI;
+float tmps, frequence, sumx, x;
+int erreur;
+
+
+using namespace std::chrono;
+
 
 
 // Controle du moteur par interruption
@@ -66,8 +75,9 @@ int main()
     frequence = (200 * 16) * (360 / 360);
     tmps = (1/frequence)/2;
     t.attach(&flip1, tmps);
-
+    compteur.start();
     while (true) {
+        
         cmps12.write(CMPS_ADDR, 0, 1);
         cmps12.read(CMPS_ADDR, data, sizeof(data));
         process_variable = data[5];
@@ -75,32 +85,51 @@ int main()
         if (process_variable >= 90)
             process_variable = process_variable - 256;
 
-        int erreur = 0 - process_variable;
+        erreur = 0 - process_variable;
         printf("Erreur: %d \r\n", erreur);
-     
-        float commande = 22 * erreur;
 
-        if (commande < -1)
+
+
+        commande = 22 * erreur;
+        P = commande;
+        compteur.stop();
+        dtemps = duration_cast<milliseconds>(compteur.elapsed_time()).count();
+        compteur.reset();
+        compteur.start();
+        dtemps = dtemps/1000;
+
+        x = erreur * dtemps;
+        sumx = sumx + x;
+
+        I = sumx * 20;
+        PI = P + I;
+        
+        printf("The time taken was %f milliseconds\n", dtemps);
+        printf("PI : %f \r\n", PI);
+
+        compteur.stop();
+        
+        if (PI < -1)
         {
             DIR1 = 0;
             DIR2 = 1;
             EN = 0;
-            frequence = (200 * 16) * (commande / 360) * -1;
+            frequence = (200 * 16) * (PI / 360) * -1;
             //tmps = (1/frequence)/2;
             //t.attach(&flip1, tmps);
         }
 
-        if (commande > 1)
+        if (PI > 1)
         {
             DIR1 = 1;
             DIR2 = 0;
             EN = 0;
-            frequence = (200 * 16) * (commande / 360);
+            frequence = (200 * 16) * (PI / 360);
             //tmps = (1/frequence)/2;
             //t.attach(&flip1, tmps);
         }
         
-        if (commande > -5 && commande < 5 )
+        if (PI > -5 && PI < 5 )
         {
             EN = 0;
             DIR1 = 1;
