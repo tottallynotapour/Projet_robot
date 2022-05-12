@@ -1,6 +1,8 @@
 //Robert, Brian, Hugo, Leonard
 //Projet - robot PID
 //Fonctions demontrees : balance, chute, tourne sur place
+//Github : https://github.com/tottallynotapour/Projet_robot/tree/feature/bearing
+//Voir repertoire source
 
 
 #include "mbed.h"
